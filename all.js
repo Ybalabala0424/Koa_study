@@ -1,25 +1,15 @@
 const Koa=require('koa');
 const app=new Koa();
 const router=require('koa-router')();
-const request=require('request');
-const mysql=require('mysql');
-const connection=mysql.createConnection({
-    host:'localhost',
-    user:'root',
-    password:'',
-    database: 'register_koa'
-});
+const rp=require('request-promise');
+const mysql=require('promise-mysql');
 async function getRequest(name){
     const url="http://v.juhe.cn/weather/index?cityname="+name+"&dtype=&format=&key=15448dc543b57c3eb503a23803f3eb6d";
-    let result=await request(url,function (error,response,data) {
-        if(!error&&response.statusCode===200){
-            let chart=JSON.parse(data);
+    let result=await rp(url)
+        .then(function (data) {
+            const chart=JSON.parse(data);
             return chart;
-        }else{
-            return;
-        }
-    });
-    // console.log(result);
+        });
     return result;
 }
 const report=async (ctx)=>{
@@ -29,23 +19,27 @@ const report=async (ctx)=>{
     let name=array[1];
     // console.log(name);
     let chart=await getRequest(name);
-    // console.log(chart);
+    console.log(chart);
     ctx.body=chart;
+    // ctx.body;
 };
-const register=async (ctx)=>{
+const register=(ctx)=>{
     let userid=ctx.query.userid;
     let password=ctx.query.password;
-    connection.connect();
     let sql="insert into message VALUES ("+userid+","+password+");";
     // console.log(sql);
-    let result=await connection.query(sql,function (err) {
-        if (err){
-            throw err;
-        }
+    let result=mysql.createConnection({
+        host:'localhost',
+        user:'root',
+        password:'',
+        database: 'register_koa'
+}).then(function (conn) {
+        var result=conn.query("insert into message VALUES ("+userid+","+password+");");
+        conn.end();
+        console.log(result);
+        return result;
     });
-    connection.end();
-    // console.log(result);
-    ctx.body=result.toString();
+    ctx.body=result;
 };
 const calculator=async function (ctx) {
     let str=ctx.query.str.toString();
