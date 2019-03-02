@@ -16,14 +16,14 @@ const report=async (ctx)=>{
     let name=array[1];
     // console.log(name);
     let chart=await getRequest(name);
-    console.log(chart);
+    // console.log(chart);
     ctx.body=chart;
     // ctx.body;
 };
 const register=async (ctx)=>{
     let userid=ctx.query.userid;
     let password=ctx.query.password;
-    let sql="insert into message VALUES ("+userid+","+password+");";
+    // let sql="insert into message VALUES ("+userid+","+password+");";
     // console.log(sql);
     let conn=await mysql.createConnection({
         host:'localhost',
@@ -33,7 +33,7 @@ const register=async (ctx)=>{
     })
     let result=await conn.query("insert into message VALUES ("+userid+","+password+");");
     conn.end();
-    console.log(result);
+    // console.log(result);
     ctx.body=result;
 };
 const calculator=async function (ctx) {
