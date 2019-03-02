@@ -5,11 +5,8 @@ const rp=require('request-promise');
 const mysql=require('promise-mysql');
 async function getRequest(name){
     const url="http://v.juhe.cn/weather/index?cityname="+name+"&dtype=&format=&key=15448dc543b57c3eb503a23803f3eb6d";
-    let result=await rp(url)
-        .then(function (data) {
-            const chart=JSON.parse(data);
-            return chart;
-        });
+    let result=JSON.parse(await rp(url));
+    // console.log(result);
     return result;
 }
 const report=async (ctx)=>{
@@ -19,26 +16,24 @@ const report=async (ctx)=>{
     let name=array[1];
     // console.log(name);
     let chart=await getRequest(name);
-    // console.log(chart);
+    console.log(chart);
     ctx.body=chart;
     // ctx.body;
 };
-const register=(ctx)=>{
+const register=async (ctx)=>{
     let userid=ctx.query.userid;
     let password=ctx.query.password;
-    // let sql="insert into message VALUES ("+userid+","+password+");";
+    let sql="insert into message VALUES ("+userid+","+password+");";
     // console.log(sql);
-    let result=mysql.createConnection({
+    let conn=await mysql.createConnection({
         host:'localhost',
         user:'root',
         password:'',
         database: 'register_koa'
-}).then(function (conn) {
-        var result=conn.query("insert into message VALUES ("+userid+","+password+");");
-        conn.end();
-        // console.log(result);
-        return result;
-    });
+    })
+    let result=await conn.query("insert into message VALUES ("+userid+","+password+");");
+    conn.end();
+    console.log(result);
     ctx.body=result;
 };
 const calculator=async function (ctx) {
